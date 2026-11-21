@@ -1,15 +1,10 @@
-// main.ts — copy the rendered entry image to /output/entry.png.
-// Node 22, stdlib only. Deterministic: a plain byte-for-byte copy,
-// so running it twice produces identical output.
-import { copyFileSync, mkdirSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+// VELMARA entrypoint: place the finished poster where the grader looks.
+// Node 22, standard library only — no network, no extra packages.
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
-const here = dirname(fileURLToPath(import.meta.url));
-const src = join(here, 'entry.png');
-const outDir = '/output';
-const dest = join(outDir, 'entry.png');
-
-mkdirSync(outDir, { recursive: true });
-copyFileSync(src, dest);
-console.log(`copied ${src} -> ${dest}`);
+const poster = readFileSync(new URL("./entry.png", import.meta.url));
+const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
+mkdirSync(outDir, { recursive: true, mode: 0o755 });
+writeFileSync(join(outDir, "entry.png"), poster);
+console.log(`wrote ${poster.length} bytes to ${join(outDir, "entry.png")}`);
